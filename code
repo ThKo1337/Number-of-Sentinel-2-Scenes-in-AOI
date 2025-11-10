@@ -1,0 +1,20 @@
+var collection = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED") 
+  .filterBounds(table) 
+  .filterDate('20XX-01-01', '20XX-05-31') 
+  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 30));
+
+// Filter images that contain both Band 03 and Band 08 
+var filtered = collection.filter(ee.Filter.and( 
+  ee.Filter.listContains('system:band_names', 'B3'), 
+  ee.Filter.listContains('system:band_names', 'B8') 
+));
+
+// Get unique dates where both bands are available 
+var uniqueDates = filtered.aggregate_array('system:time_start') 
+  .map(function(d) { 
+  return ee.Date(d).format('YYYY-MM-dd'); 
+}) 
+.distinct();
+
+print('Number of unique dates with B3 and B8:', uniqueDates.size()); 
+print('Dates with B3 and B8:', uniqueDates);
